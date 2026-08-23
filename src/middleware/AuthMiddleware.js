@@ -18,4 +18,14 @@ function protect(req, res, next) {
   }
 }
 
-module.exports = { protect };
+function isAdminOrManager(req, res, next) {
+  const role = (req.user?.role || '').toUpperCase();
+
+  if (role !== 'ADMIN' && role !== 'MANAGER') {
+    return error(res, 'Unauthorized', 403);
+  }
+
+  next();
+}
+
+module.exports = { protect, isAdminOrManager };

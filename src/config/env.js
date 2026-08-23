@@ -20,4 +20,8 @@ module.exports = {
     expiresIn: process.env.JWT_EXPIRES_IN || '7d',
   },
   corsOrigin: process.env.CORS_ORIGIN || '*',
+  baseUrl: process.env.BASE_URL || '',
+  recaptcha: {
+    secret: process.env.RECAPTCHA_SECRET || '',
+  },
 };

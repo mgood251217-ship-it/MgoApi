@@ -1,54 +1,117 @@
 const asyncHandler = require('../middleware/asyncHandler');
 const { success, error } = require('../utils/response');
-const { comparePassword, hashPassword } = require('../utils/password');
+const { comparePassword } = require('../utils/password');
 const { signToken } = require('../utils/jwt');
+const env = require('../config/env');
 const userModel = require('../models/User');
 
+function getClientIp(req) {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (forwarded) {
+    return forwarded.split(',')[0].trim();
+  }
+  return req.socket.remoteAddress;
+}
+
+function isLocalhostRequest(req) {
+  const ip = getClientIp(req);
+  return ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
+}
+
+async function verifyRecaptcha(token, threshold) {
+  const url = `https://www.google.com/recaptcha/api/siteverify?secret=${env.recaptcha.secret}&response=${encodeURIComponent(token)}`;
+  const response = await fetch(url);
+  const result = await response.json();
+
+  return (
+    result.success === true &&
+    typeof result.score === 'number' &&
+    result.score >= threshold &&
+    result.action === 'login'
+  );
+}
+
 const login = asyncHandler(async (req, res) => {
-  const { username, password } = req.body;
+  const username = (req.body.username || '').trim().toLowerCase();
+  const password = req.body.password || '';
+  const recaptchaToken = req.body['g-recaptcha-response'] || '';
 
-  if (!username || !password) {
-    return error(res, 'Username and password are required', 422);
+  const isDesktopApp = req.headers['x-client-type'] === 'desktop-app';
+  const scoreThreshold = isDesktopApp ? 0.3 : 0.5;
+  const isLocalhost = isLocalhostRequest(req);
+
+  if (!isLocalhost) {
+    if (!recaptchaToken) {
+      return error(res, 'reCAPTCHA tidak valid!');
+    }
+
+    let recaptchaValid = false;
+
+    try {
+      recaptchaValid = await verifyRecaptcha(recaptchaToken, scoreThreshold);
+    } catch (err) {
+      return error(res, 'Gagal memverifikasi reCAPTCHA. Coba lagi.');
+    }
+
+    if (!recaptchaValid) {
+      return error(res, 'Aktivitas mencurigakan terdeteksi!');
+    }
   }
 
-  const user = await userModel.findByUsername(username);
+  const exists = await userModel.checkUser(username);
 
-  if (!user) {
-    return error(res, 'Invalid credentials', 401);
+  if (!exists) {
+    return error(res, 'Username atau password salah!', 401);
   }
 
-  const match = await comparePassword(password, user.password);
+  const authData = await userModel.getUserAuthData(username);
+  const match = await comparePassword(password, authData.password);
 
   if (!match) {
-    return error(res, 'Invalid credentials', 401);
+    return error(res, 'Username atau password salah!', 401);
   }
 
-  const token = signToken({ id: user.id, username: user.username, role: user.role });
+  const user = await userModel.getUserByUsername(username);
 
-  delete user.password;
+  const token = signToken({
+    user_id: user.user_id,
+    store_id: user.store_id,
+    role: user.role,
+    username: user.username,
+    initial: user.initial,
+    name: user.name,
+  });
 
-  return success(res, { user, token }, 'Login successful');
+  return success(res, { user, token }, 'Login Berhasil');
 });
 
-const register = asyncHandler(async (req, res) => {
-  const { username, password, name, role } = req.body;
+const session = asyncHandler(async (req, res) => {
+  const user = await userModel.getUserByUsername(req.user.username);
 
-  if (!username || !password || !name) {
-    return error(res, 'Username, password, and name are required', 422);
+  if (!user) {
+    return error(res, 'Belum login.', 401);
   }
 
-  const existing = await userModel.findByUsername(username);
+  const fotoLink = `${env.baseUrl}/assets/img/user/${user.picture || 'default.png'}`;
 
-  if (existing) {
-    return error(res, 'Username already taken', 409);
-  }
-
-  const hashed = await hashPassword(password);
-  const user = await userModel.create({ username, password: hashed, name, role: role || 'user' });
-
-  delete user.password;
-
-  return success(res, user, 'User registered', 201);
+  return success(
+    res,
+    {
+      user: {
+        role: user.role,
+        username: user.username,
+        initial: user.initial,
+        name: user.name,
+        foto: user.picture,
+        foto_link: fotoLink,
+      },
+    },
+    'Session aktif.'
+  );
 });
 
-module.exports = { login, register };
+const logout = asyncHandler(async (req, res) => {
+  return success(res, null, 'Berhasil logout');
+});
+
+module.exports = { login, session, logout };

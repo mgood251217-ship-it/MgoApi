@@ -1,3 +1,5 @@
+process.env.TZ = 'Asia/Jakarta';
+
 const path = require('path');
 const dotenv = require('dotenv');
 
@@ -24,4 +26,6 @@ module.exports = {
   recaptcha: {
     secret: process.env.RECAPTCHA_SECRET || '',
   },
+  encryptionKey: process.env.ENCRYPTION_KEY || 'kunci-rahasia-sangat-aman',
+  localHosts: (process.env.LOCAL_HOSTS || 'localhost,192.168.100.110,127.0.0.1,::1').split(','),
 };

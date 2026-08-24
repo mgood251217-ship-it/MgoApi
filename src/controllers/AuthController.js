@@ -2,8 +2,11 @@ const asyncHandler = require('../middleware/asyncHandler');
 const { success, error } = require('../utils/response');
 const { comparePassword } = require('../utils/password');
 const { signToken } = require('../utils/jwt');
+const { isLocalhostRequest } = require('../utils/helpers');
 const env = require('../config/env');
 const userModel = require('../models/User');
+const storeModel = require('../models/Store');
+const loginActivityModel = require('../models/LoginActivity');
 
 function getClientIp(req) {
   const forwarded = req.headers['x-forwarded-for'];
@@ -13,9 +16,8 @@ function getClientIp(req) {
   return req.socket.remoteAddress;
 }
 
-function isLocalhostRequest(req) {
-  const ip = getClientIp(req);
-  return ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
+function formatDateForMysql(date) {
+  return date.toISOString().slice(0, 19).replace('T', ' ');
 }
 
 async function verifyRecaptcha(token, threshold) {
@@ -72,6 +74,12 @@ const login = asyncHandler(async (req, res) => {
   }
 
   const user = await userModel.getUserByUsername(username);
+  const store = await storeModel.getStoreById(user.store_id);
+  const mode = await userModel.getUserMode(user.user_id);
+
+  const address = getClientIp(req);
+  const date = formatDateForMysql(new Date());
+  await loginActivityModel.logLogin(user.user_id, address, date);
 
   const token = signToken({
     user_id: user.user_id,
@@ -80,9 +88,18 @@ const login = asyncHandler(async (req, res) => {
     username: user.username,
     initial: user.initial,
     name: user.name,
+    mode,
   });
 
-  return success(res, { user, token }, 'Login Berhasil');
+  return success(
+    res,
+    {
+      user: { ...user, mode },
+      store,
+      token,
+    },
+    'Login Berhasil'
+  );
 });
 
 const session = asyncHandler(async (req, res) => {
@@ -92,7 +109,10 @@ const session = asyncHandler(async (req, res) => {
     return error(res, 'Belum login.', 401);
   }
 
+  const store = await storeModel.getStoreById(user.store_id);
+
   const fotoLink = `${env.baseUrl}/assets/img/user/${user.picture || 'default.png'}`;
+  const storeLogoLink = `${env.baseUrl}/assets/img/store/${store?.logo || 'default.jpg'}`;
 
   return success(
     res,
@@ -105,6 +125,14 @@ const session = asyncHandler(async (req, res) => {
         foto: user.picture,
         foto_link: fotoLink,
       },
+      store: store
+        ? {
+            name: store.name,
+            address: store.address,
+            logo: store.logo,
+            logo_link: storeLogoLink,
+          }
+        : null,
     },
     'Session aktif.'
   );

@@ -3,6 +3,7 @@ const fs = require('fs');
 const asyncHandler = require('../middleware/asyncHandler');
 const { success, error } = require('../utils/response');
 const { compressImage } = require('../utils/imageHelpers');
+const { updateStoreCache } = require('../utils/cacheHelpers');
 const env = require('../config/env');
 const userModel = require('../models/User');
 
@@ -61,6 +62,7 @@ const create = asyncHandler(async (req, res) => {
     return error(res, 'Gagal menambahkan user.');
   }
 
+  updateStoreCache(data.store_id, 'users');
   return success(res, null, 'User berhasil ditambahkan.');
 });
 
@@ -99,6 +101,7 @@ const update = asyncHandler(async (req, res) => {
     return error(res, 'Gagal memperbarui user.');
   }
 
+  updateStoreCache(data.store_id, 'users');
   return success(res, null, 'User berhasil diperbarui.');
 });
 
@@ -116,6 +119,7 @@ const remove = asyncHandler(async (req, res) => {
     return error(res, 'Gagal menghapus user.');
   }
 
+  updateStoreCache(data.store_id, 'users');
   return success(res, null, 'User berhasil dihapus.');
 });
 

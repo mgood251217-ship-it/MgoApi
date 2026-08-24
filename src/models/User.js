@@ -110,6 +110,11 @@ async function deleteUserById(id) {
   return result.affectedRows > 0;
 }
 
+async function getUserMode(userId) {
+  const [rows] = await db.query('SELECT mode FROM user_setting WHERE user_id = ?', [userId]);
+  return rows[0] ? Number(rows[0].mode) : 0;
+}
+
 module.exports = {
   createUser,
   updateUser,
@@ -118,6 +123,7 @@ module.exports = {
   getUsersByStoreId,
   getUserByUsername,
   getUserAuthData,
+  getUserMode,
   checkUser,
   checkValidOperator,
   checkDuplicateUser,

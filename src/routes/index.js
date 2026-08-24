@@ -3,8 +3,9 @@ const { error } = require('../utils/response');
 const authActions = require('./AuthRoutes');
 const userActions = require('./UserRoutes');
 const settingActions = require('./SettingRoutes');
+const datasetActions = require('./DatasetRoutes');
 
-const actions = { ...authActions, ...userActions, ...settingActions };
+const actions = { ...authActions, ...userActions, ...settingActions, ...datasetActions };
 
 function runMiddlewareChain(middlewares, req, res) {
   return new Promise((resolve, reject) => {

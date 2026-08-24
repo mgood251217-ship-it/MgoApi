@@ -60,4 +60,27 @@ function updateOrderTrigger(storeId, orderId) {
   fs.writeFileSync(filePath, JSON.stringify(data));
 }
 
-module.exports = { updateStoreCache, updateOrderTrigger };
+function getStoreDataset(storeId) {
+  const datasetPath = path.join(datasetDir, `store_${storeId}.json`);
+  const orderTriggerPath = path.join(ordersDir, `store_${storeId}.json`);
+
+  let data = {};
+
+  if (fs.existsSync(datasetPath)) {
+    const datasetArr = readJsonSafe(datasetPath);
+    if (datasetArr && typeof datasetArr === 'object') {
+      data = { ...data, ...datasetArr };
+    }
+  }
+
+  if (fs.existsSync(orderTriggerPath)) {
+    const orderArr = readJsonSafe(orderTriggerPath);
+    if (orderArr && typeof orderArr === 'object') {
+      data.order_trigger = orderArr;
+    }
+  }
+
+  return data;
+}
+
+module.exports = { updateStoreCache, updateOrderTrigger, getStoreDataset };

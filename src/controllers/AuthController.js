@@ -111,9 +111,20 @@ const session = asyncHandler(async (req, res) => {
   }
 
   const store = await storeModel.getStoreById(user.store_id);
+  const mode = await userModel.getUserMode(user.user_id);
 
   const fotoLink = `${env.baseUrl}/assets/img/user/${user.picture || 'default.png'}`;
   const storeLogoLink = `${env.baseUrl}/assets/img/store/${store?.logo || 'default.jpg'}`;
+
+  const token = signToken({
+    user_id: user.user_id,
+    store_id: user.store_id,
+    role: user.role,
+    username: user.username,
+    initial: user.initial,
+    name: user.name,
+    mode,
+  });
 
   return success(
     res,
@@ -125,6 +136,7 @@ const session = asyncHandler(async (req, res) => {
         name: user.name,
         foto: user.picture,
         foto_link: fotoLink,
+        mode,
       },
       store: store
         ? {
@@ -134,6 +146,7 @@ const session = asyncHandler(async (req, res) => {
             logo_link: storeLogoLink,
           }
         : null,
+      token,
     },
     'Session aktif.'
   );

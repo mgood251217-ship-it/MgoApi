@@ -16,9 +16,9 @@ module.exports = {
     middlewares: [protect, isAdminOrManager, upload.single('picture')],
     handler: userController.update,
   },
-  delete_user: { method: 'POST', middlewares: [protect, isAdminOrManager], handler: userController.remove },
+  delete_user: { method: 'POST', middlewares: [protect, isAdminOrManager, upload.none()], handler: userController.remove },
   get_initial: { method: 'GET', middlewares: [protect], handler: userController.getInitial },
-  create_help: { method: 'POST', middlewares: [protect], handler: userController.createHelp },
+  create_help: { method: 'POST', middlewares: [protect, upload.none()], handler: userController.createHelp },
   helps: { method: 'GET', middlewares: [protect], handler: userController.getHelps },
-  update_help_status: { method: 'POST', middlewares: [protect], handler: userController.updateHelpStatus },
+  update_help_status: { method: 'POST', middlewares: [protect, upload.none()], handler: userController.updateHelpStatus },
 };

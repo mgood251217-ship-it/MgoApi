@@ -1,11 +1,9 @@
-const express = require('express');
 const { protect } = require('../middleware/AuthMiddleware');
 const authController = require('../controllers/AuthController');
 
-const router = express.Router();
-
-router.post('/login', authController.login);
-router.get('/session', protect, authController.session);
-router.post('/logout', protect, authController.logout);
-
-module.exports = router;
+module.exports = {
+  login: { method: 'POST', middlewares: [], handler: authController.login },
+  logout: { method: 'POST', middlewares: [protect], handler: authController.logout },
+  session: { method: 'GET', middlewares: [protect], handler: authController.session },
+  test_connection: { method: 'GET', middlewares: [], handler: authController.testConnection },
+};

@@ -128,4 +128,41 @@ const getInitial = asyncHandler(async (req, res) => {
   return success(res, initials, 'Berhasil mengambil Initial');
 });
 
-module.exports = { index, create, update, remove, getInitial };
+const createHelp = asyncHandler(async (req, res) => {
+  const data = {
+    user_id: req.user.user_id,
+    category: (req.body.category || '').trim().toUpperCase(),
+    subject: (req.body.subject || '').trim().toUpperCase(),
+    detail: (req.body.detail || '').trim().toUpperCase(),
+    status: (req.body.status || '').trim().toUpperCase(),
+    datetime: (req.body.datetime || '').trim().toUpperCase(),
+  };
+
+  const created = await userModel.createHelp(data);
+
+  if (!created) {
+    return error(res, 'Gagal mengirim pengajuan');
+  }
+
+  return success(res, null, 'Berhasil mengirim pengajuan');
+});
+
+const updateHelpStatus = asyncHandler(async (req, res) => {
+  const id = parseInt(req.body.id || '0', 10);
+  const status = (req.body.status || '').trim().toUpperCase();
+
+  const updated = await userModel.updateHelpStatus(id, status);
+
+  if (!updated) {
+    return error(res, 'Gagal update pengajuan');
+  }
+
+  return success(res, null, 'Berhasil update pengajuan');
+});
+
+const getHelps = asyncHandler(async (req, res) => {
+  const data = await userModel.getHelps(req.user.user_id);
+  return success(res, data, 'Berhasil mengambil data pengajuan');
+});
+
+module.exports = { index, create, update, remove, getInitial, createHelp, updateHelpStatus, getHelps };

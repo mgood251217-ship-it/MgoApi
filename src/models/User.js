@@ -115,6 +115,24 @@ async function getUserMode(userId) {
   return rows[0] ? Number(rows[0].mode) : 0;
 }
 
+async function createHelp(data) {
+  const [result] = await db.query(
+    'INSERT INTO help_center (user_id, category, subject, detail, status, datetime) VALUES (?, ?, ?, ?, ?, ?)',
+    [data.user_id, data.category, data.subject, data.detail, data.status, data.datetime]
+  );
+  return result.affectedRows > 0;
+}
+
+async function updateHelpStatus(id, status) {
+  const [result] = await db.query('UPDATE help_center SET status = ? WHERE id = ?', [status, id]);
+  return result.affectedRows > 0;
+}
+
+async function getHelps(userId) {
+  const [rows] = await db.query('SELECT * FROM help_center WHERE user_id = ?', [userId]);
+  return rows;
+}
+
 module.exports = {
   createUser,
   updateUser,
@@ -129,4 +147,7 @@ module.exports = {
   checkDuplicateUser,
   checkUserStore,
   deleteUserById,
+  createHelp,
+  updateHelpStatus,
+  getHelps,
 };

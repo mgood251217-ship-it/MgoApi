@@ -4,6 +4,7 @@ const { comparePassword } = require('../utils/password');
 const { signToken } = require('../utils/jwt');
 const { isLocalhostRequest } = require('../utils/helpers');
 const env = require('../config/env');
+const db = require('../config/db');
 const userModel = require('../models/User');
 const storeModel = require('../models/Store');
 const loginActivityModel = require('../models/LoginActivity');
@@ -142,4 +143,9 @@ const logout = asyncHandler(async (req, res) => {
   return success(res, null, 'Berhasil logout');
 });
 
-module.exports = { login, session, logout };
+const testConnection = asyncHandler(async (req, res) => {
+  const [rows] = await db.query('SELECT NOW() AS server_time');
+  return success(res, rows[0], 'Database Connected');
+});
+
+module.exports = { login, session, logout, testConnection };

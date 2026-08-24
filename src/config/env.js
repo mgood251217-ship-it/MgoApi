@@ -21,7 +21,9 @@ module.exports = {
     secret: process.env.JWT_SECRET,
     expiresIn: process.env.JWT_EXPIRES_IN || '7d',
   },
-  corsOrigin: process.env.CORS_ORIGIN || '*',
+  allowedOrigins: (
+    process.env.ALLOWED_ORIGINS || 'http://localhost:51730,http://localhost:5173,https://mgood.my.id'
+  ).split(','),
   baseUrl: process.env.BASE_URL || '',
   recaptcha: {
     secret: process.env.RECAPTCHA_SECRET || '',

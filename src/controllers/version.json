@@ -1,0 +1,12 @@
+{
+    "version": "1.0.8",
+    "min_required_version": "1.0.6",
+    "download_url": "https://github.com/mgood251217-ship-it/MgoApp/releases/download/v1.0.8/MgoDesktop-Setup-1.0.8.exe",
+    "force_update": false,
+    "release_notes": [
+      "fix : error save setting",
+      "fix : input waktu in add order item",
+      "feat : display product on online role",
+      "feat : help center"
+     ]
+}

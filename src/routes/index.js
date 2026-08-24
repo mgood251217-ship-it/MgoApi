@@ -2,8 +2,9 @@ const express = require('express');
 const { error } = require('../utils/response');
 const authActions = require('./AuthRoutes');
 const userActions = require('./UserRoutes');
+const settingActions = require('./SettingRoutes');
 
-const actions = { ...authActions, ...userActions };
+const actions = { ...authActions, ...userActions, ...settingActions };
 
 function runMiddlewareChain(middlewares, req, res) {
   return new Promise((resolve, reject) => {

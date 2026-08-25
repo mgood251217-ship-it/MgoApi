@@ -4,8 +4,9 @@ const authActions = require('./AuthRoutes');
 const userActions = require('./UserRoutes');
 const settingActions = require('./SettingRoutes');
 const datasetActions = require('./DatasetRoutes');
+const productActions = require('./ProductRoutes');
 
-const actions = { ...authActions, ...userActions, ...settingActions, ...datasetActions };
+const actions = { ...authActions, ...userActions, ...settingActions, ...datasetActions, ...productActions };
 
 function runMiddlewareChain(middlewares, req, res) {
   return new Promise((resolve, reject) => {

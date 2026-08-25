@@ -5,8 +5,20 @@ const userActions = require('./UserRoutes');
 const settingActions = require('./SettingRoutes');
 const datasetActions = require('./DatasetRoutes');
 const productActions = require('./ProductRoutes');
+const financeActions = require('./FinanceRoutes');
+const paymentActions = require('./PaymentRoutes');
+const storeActions = require('./StoreRoutes');
 
-const actions = { ...authActions, ...userActions, ...settingActions, ...datasetActions, ...productActions };
+const actions = {
+  ...authActions,
+  ...userActions,
+  ...settingActions,
+  ...datasetActions,
+  ...productActions,
+  ...financeActions,
+  ...paymentActions,
+  ...storeActions,
+};
 
 function runMiddlewareChain(middlewares, req, res) {
   return new Promise((resolve, reject) => {

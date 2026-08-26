@@ -15,7 +15,7 @@ async function createOrder(data) {
       data.date,
     ]
   );
-  return result.affectedRows > 0;
+  return result.insertId;
 }
 
 async function updateOrder(data) {

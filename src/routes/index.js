@@ -8,6 +8,7 @@ const productActions = require('./ProductRoutes');
 const financeActions = require('./FinanceRoutes');
 const paymentActions = require('./PaymentRoutes');
 const storeActions = require('./StoreRoutes');
+const orderActions = require('./OrderRoutes');
 
 const actions = {
   ...authActions,
@@ -18,6 +19,7 @@ const actions = {
   ...financeActions,
   ...paymentActions,
   ...storeActions,
+  ...orderActions,
 };
 
 function runMiddlewareChain(middlewares, req, res) {
